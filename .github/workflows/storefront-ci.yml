@@ -1,0 +1,71 @@
+name: storefront-ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: storefront-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Stage 1 - Dockerfile Lint & Asset Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+      - name: Verify required assets
+        run: |
+          test -f Dockerfile
+          test -f .dockerignore
+          test -f nginx.conf
+          test -f src/index.html
+          test -x scripts/smoke-test.sh
+          echo "OK: all required assets present"
+
+  build-and-test:
+    name: Stage 2 - Build, Load & Release Gate
+    needs: audit
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: nile-storefront:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (load locally, GHA cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+          tags: ${{ env.IMAGE }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Inspect image
+        run: docker image inspect "$IMAGE" --format 'Size: {{.Size}} bytes, User: {{.Config.User}}'
+
+      - name: Release gate - smoke test
+        env:
+          EXPECTED_VERSION: ${{ github.sha }}
+        run: bash scripts/smoke-test.sh
+
+      # النشر (Push) يُضاف في NM-219 بعد اجتياز هذه البوابة.
