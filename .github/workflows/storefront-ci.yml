@@ -63,10 +63,9 @@ jobs:
       - name: Inspect image
         run: |
           docker image inspect "$IMAGE" --format 'Size: {{.Size}} bytes, User: {{.Config.User}}'
-
+          
       - name: Release gate - smoke test
         env:
+          IMAGE: ${{ env.IMAGE }}
           EXPECTED_VERSION: ${{ github.sha }}
         run: bash scripts/smoke-test.sh
-
-      # النشر (Push) يُضاف في NM-219 بعد اجتياز هذه البوابة.
