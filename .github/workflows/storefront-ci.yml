@@ -61,7 +61,8 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Inspect image
-        run: docker image inspect "$IMAGE" --format 'Size: {{.Size}} bytes, User: {{.Config.User}}'
+        run: |
+          docker image inspect "$IMAGE" --format 'Size: {{.Size}} bytes, User: {{.Config.User}}'
 
       - name: Release gate - smoke test
         env:
