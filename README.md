@@ -1,19 +1,15 @@
-# Nile Storefront
-
-واجهة متجر Nile Market. تُبنى كصورة Docker غير root، وتمر عبر بوابة إصدار آلية قبل أي نشر.
-
-## التشغيل المحلي
+# Nile Market Storefront — Enterprise CI/CD Pipeline
+![CI/CD Release Pipeline](https://github.com/gasoom/nile-storefront/actions/work
+flows/storefront-ci.yml/badge.svg)
+Production-grade containerized web service built with **non-root Nginx (UID 101)
+**, verified by **Hadolint** and automated **Smoke Testing**, and published via
+**Docker Buildx** to Docker Hub.
+- **Engineer:** Eng. Abualgasim Hazim
+- **Module:** DEV-OPS-WEEK-07 Capstone Project
+## Quick Start (Pull & Run from Docker Hub)
 ```bash
-docker build --build-arg APP_VERSION=local-dev -t nile-storefront:local-dev .
-IMAGE=nile-storefront:local-dev EXPECTED_VERSION=local-dev bash scripts/smoke-test.sh
+docker pull gasoom/nile-storefront:1.0.0
+docker run -d --name storefront-prod -p 8080:8080 gasoom/nile-storefront:1.0.0
+curl http://localhost:8080/healthz
+curl http://localhost:8080/
 ```
-
-## الاختبار اليدوي بعد التشغيل
-```bash
-docker run -d -p 8080:8080 --name storefront nile-storefront:local-dev
-curl http://127.0.0.1:8080/healthz
-```
-
-## الخطوات القادمة
-- [x] Sprint 7 - اليوم 4: بناء، فحص، اختبار دخان
-- [ ] NM-219: النشر إلى GHCR بعد اجتياز البوابة على `main`
