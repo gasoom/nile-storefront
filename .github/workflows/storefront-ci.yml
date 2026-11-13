@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE_NAME: nile-storefront
+  IMAGE_NAME: NILE STOREFRONT
 
 jobs:
   audit:
